@@ -1,0 +1,19 @@
+package pspEjercicio1;
+
+import java.io.IOException;
+
+public class ejercicio1 {
+	
+	public static void main(String [] args) 
+	{
+		try 
+		{
+		ProcessBuilder pb  = new ProcessBuilder("cmd.exe"); 
+		Process cmd = pb.start();	
+		}
+		catch (IOException e) 
+		{
+			System.out.println("Error" + e);
+		}
+	}
+}

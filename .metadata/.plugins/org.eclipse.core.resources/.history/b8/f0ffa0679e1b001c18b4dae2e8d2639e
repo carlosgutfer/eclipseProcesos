@@ -1,0 +1,32 @@
+package pspEjercicio1;
+
+import java.io.IOException;
+import java.io.InputStream;
+
+public class ejercicio1 {
+	
+	public static void main(String [] args) 
+	{
+		
+		/* Código para ejercutar el cmd
+		try 
+		{
+		ProcessBuilder pb  = new ProcessBuilder("cmd.exe", "/C", "start"); 
+		Process cmd = pb.start();	
+		}
+		catch (IOException e) 
+		{
+			System.out.println("Error" + e);
+		}*/
+		
+		ProcessBuilder pb = new ProcessBuilder("ping", "8.8.8.8");
+		try 
+		{
+			InputStream ping = pb.start().getInputStream();
+			System.out.println(ping.toString());
+		}catch(IOException e)
+		{
+			System.out.println("Error" + e);
+		}
+	}
+}
