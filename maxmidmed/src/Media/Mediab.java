@@ -1,6 +1,8 @@
 package Media;
 
 import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
@@ -13,8 +15,18 @@ public class Mediab {
 		media = 0;
 		for(int i = 0; i < args.length; i++) 
 			media += Integer.parseInt(args[i]);
+		File mediaText = new File ("media.txt");
+		try {
+			mediaText.createNewFile();
+			FileWriter fw = new FileWriter(mediaText);
+			fw.write(String.valueOf(media / args.length));
+			fw.close();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		
-		ProcessBuilder fichero  = new ProcessBuilder("vim", "media.txt");
+		/*ProcessBuilder fichero  = new ProcessBuilder("vim", "media.txt");
 		try {
 			Process iniciarFichero = fichero.start();
 			OutputStream os = iniciarFichero.getOutputStream();
@@ -29,7 +41,7 @@ public class Mediab {
 			ficheroEscritura.write(System.lineSeparator());
 		} catch (IOException e) {
 			e.printStackTrace();
-		}
+		}*/
 	}
 
 }
