@@ -1,31 +1,20 @@
 package Media;
 
-import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.io.OutputStream;
-import java.io.OutputStreamWriter;
+import java.util.Scanner;
 
 public class Mediab {
+	
+	private static Scanner sc = new Scanner(System.in);
 	public static void main(String args []) 
 	{
-		double		media;
 		
-		media = 0;
-		for(int i = 0; i < args.length; i++) 
-			media += Integer.parseInt(args[i]);
-		File mediaText = new File ("media.txt");
-		try {
-			mediaText.createNewFile();
-			FileWriter fw = new FileWriter(mediaText);
-			fw.write(String.valueOf(media / args.length));
-			fw.close();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		String 		mensaje = sc.nextLine();
+		String[] 	elementos = mensaje.split(" ");	
 		
+		crearArchivo(elementos);
 		/*ProcessBuilder fichero  = new ProcessBuilder("vim", "media.txt");
 		try {
 			Process iniciarFichero = fichero.start();
@@ -42,6 +31,27 @@ public class Mediab {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}*/
+	}
+
+	private static void crearArchivo(String[] elementos) {
+		double		media;
+		File 		mediaText;
+		FileWriter 	fw;
+		
+		media = 0;
+		for(int i = 0; i < elementos.length; i++) 
+			media += Integer.parseInt(elementos[i]);
+		mediaText = new File ("media.txt");
+		try {
+			mediaText.createNewFile();
+			fw = new FileWriter(mediaText);
+			fw.write(String.valueOf((double)(media / elementos.length)));
+			System.out.println(mediaText);
+			fw.close();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 
 }

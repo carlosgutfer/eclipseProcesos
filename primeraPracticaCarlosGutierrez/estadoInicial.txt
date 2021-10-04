@@ -1,0 +1,7 @@
+Para modificar el número de las hormigas primero modificar la linea bajo " posicion hormigas" añadiendo dos números dentro del rango de tablero y despues añade un nuevo numero en "orientacion"
+tablero 
+50 40
+posicion hormigas
+26 28 2 34 13 38 23 31
+orientacion 
+2 2 2 4

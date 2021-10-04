@@ -1,19 +1,21 @@
 package Media;
 
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
+
+import java.util.Scanner;
 
 public class Media {
 
+	private static Scanner sc = new Scanner(System.in);
+
 	public static void main(String args []) 
 	{
-		double		media;
+		int		media;
+		String 		mensaje = sc.nextLine();
+		String[] 	elementos = mensaje.split(" ");	
 		
 		media = 0;
-		for(int i = 0; i < args.length; i++) 
-			media += Integer.parseInt(args[i]);
-		System.out.println(media / args.length);
-		
+		for(int i = 0; i < elementos.length; i++) 
+			media += Integer.parseInt(elementos[i]);
+		System.out.println(media / elementos.length);	
 	}
 }
