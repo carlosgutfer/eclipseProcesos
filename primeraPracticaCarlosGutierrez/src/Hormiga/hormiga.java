@@ -5,15 +5,17 @@ import java.util.Scanner;
 
 public class hormiga 
 {
-	private static Scanner sc = new Scanner(System.in); 
-	static 		int []  tablero = new int [2];
-	static ArrayList <infoHormiga> todasHormigas = new ArrayList<infoHormiga>(); 
+	static Scanner 							sc = new Scanner(System.in); 
+	private static int []  					tablero = new int [2];
+	private static ArrayList <infoHormiga> 	todasHormigas = new ArrayList<infoHormiga>(); 
+	private static int						contador;
 
 	public static void main(String [] args) 
 	{
 		String [] 	auxiliar;
-		String		entrada;
+		String 		entrada;
 		
+		contador = -1;
 		auxiliar = args[0].split(" ");
 		for(int i = 0; i < auxiliar.length; ++i)
 			tablero[i] = Integer.parseInt(auxiliar[i]);
@@ -28,12 +30,21 @@ public class hormiga
 												reglas));
 		}
 		
-	
-			for (int i = 0; i <todasHormigas.size(); ++i)
-				nuevaPosicionHormigaYOrientacion(todasHormigas.get(i).getReglas()[0], i);
-			for (int j = 0; j < todasHormigas.size(); ++j) 
-				System.out.println(todasHormigas.get(j).getY() + " " + todasHormigas.get(j).getX());
-	
+		
+		
+		do
+		{
+			entrada = sc.nextLine();
+			if (entrada.equals("next")) 
+			{
+				++contador;
+				System.out.println(todasHormigas.get(contador).getX()+ " "+todasHormigas.get(contador).getX());
+				nuevaPosicionHormigaYOrientacion(todasHormigas.get(contador).getReglas()[0], contador);
+				for (int j = 0; j < todasHormigas.size(); ++j) 
+					System.out.println(todasHormigas.get(j).getY() + " " + todasHormigas.get(j).getX());
+				System.out.println("exit");
+			}
+		}while(entrada.equals("next"));
 	}
 		
 

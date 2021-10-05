@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.util.ArrayList;
+import java.util.Scanner;
 
 public class director {
 	
@@ -28,6 +29,10 @@ public class director {
 		String			salida ;
 		File 			dir;
 		ProcessBuilder 	pb;
+		String 			lectura;
+		BufferedWriter bw;
+		BufferedReader br;
+	
 		
 		dir = new File(".\\bin");
 		pb = new ProcessBuilder ();
@@ -35,17 +40,22 @@ public class director {
 		pb.command(datosEntradaInicial);
 		try 
 		{
+			int				i = 0;
 			Process p = pb.start();
-			
-			BufferedWriter bw = new BufferedWriter(new OutputStreamWriter ( p.getOutputStream()));
-			bw.write("continua" + '\n');
-			bw.flush();
-			BufferedReader bf = new BufferedReader( new InputStreamReader (p.getInputStream()));
-			while((salida = bf.readLine()) != null)
-				System.out.println(salida);
+			lectura = "next";
+			do 
+			{
+				if (++i == 10)
+					lectura = "*";
+				bw = new BufferedWriter(new OutputStreamWriter ( p.getOutputStream()));
+				bw.write(lectura + '\n');
+				bw.flush();
+				br = new BufferedReader( new InputStreamReader (p.getInputStream()));
+				//while((lectura = br.readLine()) != "exit")
+					System.out.println(br.readLine());
+			}while( !lectura.equals("*"));
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			System.out.println(e);	
 		}		
 	}
 
@@ -74,7 +84,7 @@ public class director {
 			while(br.readLine() != null)
 					iniciaLizarVariable(br.readLine(), ++i, datosEntradaInicial);
 		} catch (IOException e) {
-			e.printStackTrace();
+			System.out.println(e);	
 		}
 		return datosEntradaInicial;
 	
