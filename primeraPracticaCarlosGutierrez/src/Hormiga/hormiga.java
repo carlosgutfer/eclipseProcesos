@@ -5,23 +5,50 @@ import java.util.Scanner;
 
 public class hormiga 
 {
-	static Scanner 							sc = new Scanner(System.in); 
 	private static int []  					tablero = new int [2];
 	private static ArrayList <infoHormiga> 	todasHormigas = new ArrayList<infoHormiga>(); 
-	private static int						contador;
 
 	public static void main(String [] args) 
 	{
-		String [] 	auxiliar;
-		String 		entrada;
+		String	entrada;
+		Scanner sc;
+		int		hormigaActual;
 		
-		contador = -1;
-		auxiliar = args[0].split(" ");
-		for(int i = 0; i < auxiliar.length; ++i)
-			tablero[i] = Integer.parseInt(auxiliar[i]);
-		for(int j = 1; j < args.length; ++j) 
+		hormigaActual = 0;
+		sc = new Scanner(System.in); 
+		inicializarHormigas(args);
+		do
 		{
-			auxiliar = args[j].split(" ");
+			entrada = sc.nextLine();
+			if (!entrada.equals("end")) 
+			{
+				System.out.println(todasHormigas.get(hormigaActual).getX() + " " + todasHormigas.get(hormigaActual).getY());
+				entrada = sc.nextLine();
+				nuevaPosicionHormigaYOrientacion(todasHormigas.get(hormigaActual).getReglas()[Integer.parseInt(entrada)], hormigaActual);
+				System.out.println(todasHormigas.get(hormigaActual).getY() + " " + todasHormigas.get(hormigaActual).getX());
+				++hormigaActual;
+				if (hormigaActual == todasHormigas.size())
+					hormigaActual = 0;	
+			}
+		}while(!entrada.equals("end"));
+		sc.close();
+	}
+
+	/* 
+	 * 1º Guardo el primer campo  del array que llega en una array auxiliar, y cada registro que tiene es el ancho y largo max. del tablero
+	 * 2º Desde el segundo campo, cargo la informacion referente a cada hormiga, cada hormiga se divide en 4 (x, y, orientacion, reglas[])
+	 *    por ello, cargo en el array reglas, el 3 registro auxiliar y después creo el objeto hormiga con todos los datos.
+	 */
+	private static void inicializarHormigas(String[] informacionInicial) 
+	{
+		String [] 	auxiliar;
+
+		auxiliar = informacionInicial[0].split(" ");
+		for(int i = 0; i < auxiliar.length; ++i)
+			tablero[i] = Integer.parseInt(auxiliar[i]) - 1;
+		for(int j = 1; j < informacionInicial.length; ++j) 
+		{
+			auxiliar = informacionInicial[j].split(" ");
 			String reglas [] = auxiliar[3].split("-");
 			todasHormigas.add(new infoHormiga(
 												Integer.parseInt(auxiliar[0]),
@@ -29,22 +56,6 @@ public class hormiga
 												Integer.parseInt(auxiliar[2]), 
 												reglas));
 		}
-		
-		
-		
-		do
-		{
-			entrada = sc.nextLine();
-			if (entrada.equals("next")) 
-			{
-				++contador;
-				System.out.println(todasHormigas.get(contador).getX()+ " "+todasHormigas.get(contador).getX());
-				nuevaPosicionHormigaYOrientacion(todasHormigas.get(contador).getReglas()[0], contador);
-				for (int j = 0; j < todasHormigas.size(); ++j) 
-					System.out.println(todasHormigas.get(j).getY() + " " + todasHormigas.get(j).getX());
-				System.out.println("exit");
-			}
-		}while(entrada.equals("next"));
 	}
 		
 
@@ -56,29 +67,35 @@ public class hormiga
 	private static void nuevaPosicionHormigaYOrientacion(String regla, int j) 
 	{
 		infoHormiga hormigaActual;
-		boolean 	derecha = true;
+		boolean 	derecha;
 		
+		derecha = true;
+		hormigaActual = todasHormigas.get(j);
 		if(regla.equals("l"))
 			derecha = false;
-		hormigaActual = todasHormigas.get(j);
-		if (derecha)
+		if (derecha) 
+		{
 			hormigaActual.setOrientacion(hormigaActual.getOrientacion() + 1);
-		else
-			hormigaActual.setOrientacion(hormigaActual.getOrientacion() - 1);		
-		if(hormigaActual.getOrientacion() == 5)
-			hormigaActual.setOrientacion(1);
-		else if(hormigaActual.getOrientacion() == 0)
-			hormigaActual.setOrientacion(4);
+			if(hormigaActual.getOrientacion() == 5)
+				hormigaActual.setOrientacion(1);
+		}
+		else 
+		{
+			hormigaActual.setOrientacion(hormigaActual.getOrientacion() - 1);
+			if(hormigaActual.getOrientacion() == 0)
+				hormigaActual.setOrientacion(4);
+		}
+		
 		switch (hormigaActual.getOrientacion()) 
 		{
 			case 1:
-				hormigaActual.setY(hormigaActual.getY() - 1);
+				hormigaActual.setX(hormigaActual.getX() - 1);
 				break;
 			case 2:
-				hormigaActual.setX(hormigaActual.getX() + 1);
+				hormigaActual.setY(hormigaActual.getY() + 1);
 				break;
 			case 3:
-				hormigaActual.setY(hormigaActual.getY() + 1);
+				hormigaActual.setX(hormigaActual.getX() + 1);
 				break;
 			case 4:
 				hormigaActual.setY(hormigaActual.getY() - 1);
@@ -88,59 +105,17 @@ public class hormiga
 	}
 	
 	//Comprueba que la hormiga al moverse sigue dentro del tablero, y si no la mete en el lugar correcto
-			private static void comprobarHormigaDentroTablero(infoHormiga hormigaActual, int j) 
-			{
-				
-				if (hormigaActual.getY() < 0)
-					hormigaActual.setY(tablero[0] - 1);
-				else if(hormigaActual.getY() == tablero[0] - 1)
-					hormigaActual.setY(0);
-				else if(hormigaActual.getX() < 0)
-					hormigaActual.setX(tablero[0] - 1);
-				else if (hormigaActual.getX() == tablero[1])
-					hormigaActual.setX(0);
-
-			}
-	
-	/*
-	private static void moverHormiga() 
+	private static void comprobarHormigaDentroTablero(infoHormiga hormigaActual, int j) 
 	{
-		int				maxInteracciones = 20000;
-		int				i;
-		boolean			derecha;
-		
-		i = -1;
-		derecha = true;
-		while(++i < maxInteracciones) 
-		{
-			for (int j = 0; j < todasHormigas.size(); ++j) 
-			{
-				switch (tablero[posicionHormigas[j][0]][posicionHormigas[j][1]]) 
-				{
-					case " ":
-						tablero[posicionHormigas[j][0]][posicionHormigas[j][1]] = "#";
-						derecha = true;
-						break;
-					case "#":
-						tablero[posicionHormigas[j][0]][posicionHormigas[j][1]] = "/";
-						derecha = true;
-						break;
-					case "/":
-						tablero[posicionHormigas[j][0]][posicionHormigas[j][1]] = "&";
-						derecha = false;
-						break;
-					case "&":
-						tablero[posicionHormigas[j][0]][posicionHormigas[j][1]] = " ";
-						derecha = false;
-						break;
-				}
-				nuevaPosicionHormigaYOrientacion(derecha, j);
-				comprobarHormigaDentroTablero(j);
-			}
-			pintarTablero();		
-		}
-	}*/
-	
+		if (hormigaActual.getX() < 0)
+			hormigaActual.setX(tablero[0] - 1);
+		else if(hormigaActual.getX() >= (tablero[0] - 1))
+			hormigaActual.setX(0);
+		else if(hormigaActual.getY() < 0)
+			hormigaActual.setY(tablero[1] - 1);
+		else if (hormigaActual.getY() >= (tablero[1] - 1))
+			hormigaActual.setY(0);
+	}
 	
 	
 	

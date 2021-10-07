@@ -9,10 +9,10 @@ public class infoHormiga {
 	private int orientacion;
 	private String [] reglas;
 	
-	public infoHormiga(int y, int x, int posicion, String[] reglas) {
+	public infoHormiga(int x, int y, int posicion, String[] reglas) {
 		super();
-		this.y = y;
 		this.x = x;
+		this.y = y;
 		this.orientacion = posicion;
 		this.reglas = reglas;
 	}

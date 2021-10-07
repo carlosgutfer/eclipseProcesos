@@ -4,63 +4,98 @@ import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.util.ArrayList;
-import java.util.Scanner;
 
 public class director {
 	
-	private static String	[][] 	tablero;
-	private static String	[]  	colores;
-	private static File 			tablerotxt;
+	private static String		[][] 			tablero;
+	private static ArrayList<String>	  		colores;
+	private static File 						tablerotxt;
+	private static int							numeroHormigas, rondasMaximas;
 	
 	public static void main (String [] args) 
-	{
-			
-		comunicacionConProcesos(cargarEstadoInicial());	
-		
-		
+	{	
+		comunicacionConProcesos(cargarEstadoInicial());		
 	}
 	
 	private static void comunicacionConProcesos(ArrayList <String> datosEntradaInicial) 
 	{
-		String			salida ;
-		File 			dir;
+		String			salida;
 		ProcessBuilder 	pb;
-		String 			lectura;
-		BufferedWriter bw;
-		BufferedReader br;
-	
-		
+		int 			indiceColorActual, i, j;
+		String [] 		respuesta, hormigasTemporal;
+
+		pb = crearProcesoHormiga(datosEntradaInicial);
+		try 
+		{
+			i = 0;
+			Process p = pb.start();
+			salida = "next";
+			hormigasTemporal = new String[numeroHormigas];
+			do 
+			{
+				if (++i > rondasMaximas)
+					salida = "end";
+				j = -1;
+				while(++j < numeroHormigas && salida != null) 
+				{
+					mandarMensaje(salida, p);
+					if ((salida = mensajeRecibido(p)) != null)
+					{
+						respuesta = salida.split(" ");
+						indiceColorActual = colores.indexOf(tablero[Integer.parseInt(respuesta[0])] [Integer.parseInt(respuesta[1])]);
+						mandarMensaje(String.valueOf(indiceColorActual), p);
+						salida = mensajeRecibido(p);
+						cambiarColorCasilla(indiceColorActual, respuesta);
+						hormigasTemporal[j] = salida; 
+					}
+				}
+				pintarTablero();
+			}while(salida != null);
+		} catch (IOException e) {
+		}		
+	}
+
+	private static ProcessBuilder crearProcesoHormiga(ArrayList<String> datosEntradaInicial) {
+		File dir;
+		ProcessBuilder pb;
 		dir = new File(".\\bin");
 		pb = new ProcessBuilder ();
 		pb.directory(dir);
 		pb.command(datosEntradaInicial);
-		try 
-		{
-			int				i = 0;
-			Process p = pb.start();
-			lectura = "next";
-			do 
-			{
-				if (++i == 10)
-					lectura = "*";
-				bw = new BufferedWriter(new OutputStreamWriter ( p.getOutputStream()));
-				bw.write(lectura + '\n');
-				bw.flush();
-				br = new BufferedReader( new InputStreamReader (p.getInputStream()));
-				//while((lectura = br.readLine()) != "exit")
-					System.out.println(br.readLine());
-			}while( !lectura.equals("*"));
-		} catch (IOException e) {
-			System.out.println(e);	
-		}		
+		return pb;
+	}
+
+	private static void cambiarColorCasilla(int indiceColorActual, String[] respuesta) {
+		if ((indiceColorActual + 1) == colores.size())
+			tablero[Integer.parseInt(respuesta[0])] [Integer.parseInt(respuesta[1])] = colores.get(0);
+		else
+			tablero[Integer.parseInt(respuesta[0])] [Integer.parseInt(respuesta[1])] = colores.get(indiceColorActual + 1);
+	}
+
+	private static String mensajeRecibido(Process p) throws IOException 
+	{
+		BufferedReader	br;
+		
+		br = new BufferedReader( new InputStreamReader (p.getInputStream()));
+		return br.readLine();
+	}
+
+	private static  void mandarMensaje(String lectura, Process p) throws IOException {
+		BufferedWriter	bw;
+		
+		bw = new BufferedWriter(new OutputStreamWriter ( p.getOutputStream()));
+		bw.write(lectura);
+		bw.write("\n");
+		bw.flush();
 	}
 
 	// carga el estado inicial del tablero y le da los valores desde el archivo txt
-	private static ArrayList cargarEstadoInicial() 
+	private static ArrayList<String> cargarEstadoInicial() 
 	{
 		File				estadoInicial;
 		FileReader			fr;
@@ -83,6 +118,7 @@ public class director {
 			i = -1;
 			while(br.readLine() != null)
 					iniciaLizarVariable(br.readLine(), ++i, datosEntradaInicial);
+			numeroHormigas = i - 2;
 		} catch (IOException e) {
 			System.out.println(e);	
 		}
@@ -104,13 +140,16 @@ public class director {
 		}
 		else if(i == 1) 
 		{
-			colores = new String[argumentos.length];
+			colores = new ArrayList<String>();
 			for(int j = 0; j < argumentos.length; ++j) 
 			{
 				if (argumentos[j].equals("32"))
 					argumentos[j] = " ";
-				colores[j] = argumentos[j];
+				colores.add(argumentos[j]);
 			}
+		}else  if(i == 2)
+		{
+			rondasMaximas = Integer.parseInt(lineaLeida);
 		}else 
 			datosEntradaInicial.add(lineaLeida);
 	}
@@ -123,12 +162,11 @@ public class director {
 				tablero[i][j] = " ";
 	}
 	
-	/*
+	
 	private static void pintarTablero() 
 	{
 		
 		FileWriter 	fw;
-		boolean		hormiga;
 		
 		try {
 			fw = new FileWriter(tablerotxt, true);
@@ -136,15 +174,8 @@ public class director {
 			{
 				for (int j = 0; j < tablero[i].length; j++) 
 				{
-					hormiga = true;
-					for (int k = 0; k < posicionHormigas.length && hormiga ; ++k) 
-						if (posicionHormigas[k][0] == i && posicionHormigas[k][1] == j) 
-						{
-							fw.write((char) 165);
-							hormiga = false; 
-							//k = 4; modo feo salir no usar
-						}else if(k == 3) 		
-							fw.write(tablero[i][j]);
+		
+						fw.write(tablero[i][j]);
 						fw.write(".");
 
 				}
@@ -156,6 +187,6 @@ public class director {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-	}*/
+	}
 
 }
