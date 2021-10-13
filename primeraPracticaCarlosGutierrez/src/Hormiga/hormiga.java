@@ -1,166 +1,113 @@
 package Hormiga;
 
-import java.util.ArrayList;
 import java.util.Scanner;
 
 public class hormiga 
 {
 	private static int []  					tablero = new int [2];
-	private static ArrayList <infoHormiga> 	todasHormigas = new ArrayList<infoHormiga>(); 
+	private static infoHormiga 				hormiga;
 
 	public static void main(String [] args) 
 	{
+		inicializarHormigas(args);
+		comunicacionDirector();
+	}
+
+	//Este método se encarga de controlar las comunicaciones con el proceso director
+	private static void comunicacionDirector() 
+	{
 		String	entrada;
 		Scanner sc;
-		int		hormigaActual;
 		
-		hormigaActual = 0;
 		sc = new Scanner(System.in); 
-		inicializarHormigas(args);
 		do
 		{
 			entrada = sc.nextLine();
 			if (!entrada.equals("end")) 
 			{
-				System.out.println(todasHormigas.get(hormigaActual).getX() + " " + todasHormigas.get(hormigaActual).getY());
+				System.out.println(hormiga.getX() + " " + hormiga.getY());
 				entrada = sc.nextLine();
-				nuevaPosicionHormigaYOrientacion(todasHormigas.get(hormigaActual).getReglas()[Integer.parseInt(entrada)], hormigaActual);
-				System.out.println(todasHormigas.get(hormigaActual).getY() + " " + todasHormigas.get(hormigaActual).getX());
-				++hormigaActual;
-				if (hormigaActual == todasHormigas.size())
-					hormigaActual = 0;	
+				nuevaPosicionHormigaYOrientacion(hormiga.getReglas()[Integer.parseInt(entrada)]);
+				System.out.println(hormiga.getY() + " " + hormiga.getX());
 			}
 		}while(!entrada.equals("end"));
 		sc.close();
 	}
 
 	/* 
-	 * 1º Guardo el primer campo  del array que llega en una array auxiliar, y cada registro que tiene es el ancho y largo max. del tablero
-	 * 2º Desde el segundo campo, cargo la informacion referente a cada hormiga, cada hormiga se divide en 4 (x, y, orientacion, reglas[])
-	 *    por ello, cargo en el array reglas, el 3 registro auxiliar y después creo el objeto hormiga con todos los datos.
+	 * Al proceso por entrada ha llegado un array list con 2 registros 1º Tablero, 2º posicion, orientacion y reglas
+	 * 1º Guardo el primer campo que llega en una array auxiliar, y cada registro que tiene es el ancho y largo max. del tablero
+	 * 2º Guardo el segundo campo reescribiendo el auxiliar.
+	 * 3º Cargo en el array reglas, el 3 registro auxiliar (que son las reglas separadas por -) y después creo el objeto hormiga con todos los datos.
 	 */
 	private static void inicializarHormigas(String[] informacionInicial) 
 	{
-		String [] 	auxiliar;
+		String [] 	auxiliar, reglas;
 
 		auxiliar = informacionInicial[0].split(" ");
 		for(int i = 0; i < auxiliar.length; ++i)
 			tablero[i] = Integer.parseInt(auxiliar[i]) - 1;
-		for(int j = 1; j < informacionInicial.length; ++j) 
-		{
-			auxiliar = informacionInicial[j].split(" ");
-			String reglas [] = auxiliar[3].split("-");
-			todasHormigas.add(new infoHormiga(
-												Integer.parseInt(auxiliar[0]),
-												Integer.parseInt(auxiliar[1]),
-												Integer.parseInt(auxiliar[2]), 
-												reglas));
-		}
+		auxiliar = informacionInicial[1].split(" ");
+		reglas = auxiliar[3].split("-");
+		hormiga  = new infoHormiga(
+									Integer.parseInt(auxiliar[0]),
+									Integer.parseInt(auxiliar[1]),
+									Integer.parseInt(auxiliar[2]), 
+									reglas);
 	}
 		
-
-
-/* 
- * En este método recivo la orientación de la hormiga, su posicion , orientacion y la hormiga que toca moficar.
- *Cambio la orientación dependiendo si debe girar a la drch o la izquierda y dependiendo de donde está modifico la posición de la hormiga. 
- */
-	private static void nuevaPosicionHormigaYOrientacion(String regla, int j) 
+	/* 
+	 * En este método recivo la orientación de la hormiga, su posicion , orientacion.
+	 * Cambio la orientación dependiendo si debe girar a la drch o la izq  y, dependiendo de donde está, modifico la posición de la hormiga. 
+	 */
+	private static void nuevaPosicionHormigaYOrientacion(String regla) 
 	{
-		infoHormiga hormigaActual;
 		boolean 	derecha;
 		
 		derecha = true;
-		hormigaActual = todasHormigas.get(j);
 		if(regla.equals("l"))
 			derecha = false;
 		if (derecha) 
 		{
-			hormigaActual.setOrientacion(hormigaActual.getOrientacion() + 1);
-			if(hormigaActual.getOrientacion() == 5)
-				hormigaActual.setOrientacion(1);
+			hormiga.setOrientacion(hormiga.getOrientacion() + 1);
+			if(hormiga.getOrientacion() == 5)
+				hormiga.setOrientacion(1);
 		}
 		else 
 		{
-			hormigaActual.setOrientacion(hormigaActual.getOrientacion() - 1);
-			if(hormigaActual.getOrientacion() == 0)
-				hormigaActual.setOrientacion(4);
+			hormiga.setOrientacion(hormiga.getOrientacion() - 1);
+			if(hormiga.getOrientacion() == 0)
+				hormiga.setOrientacion(4);
 		}
 		
-		switch (hormigaActual.getOrientacion()) 
+		switch (hormiga.getOrientacion()) 
 		{
 			case 1:
-				hormigaActual.setX(hormigaActual.getX() - 1);
+				hormiga.setX(hormiga.getX() - 1);
 				break;
 			case 2:
-				hormigaActual.setY(hormigaActual.getY() + 1);
+				hormiga.setY(hormiga.getY() + 1);
 				break;
 			case 3:
-				hormigaActual.setX(hormigaActual.getX() + 1);
+				hormiga.setX(hormiga.getX() + 1);
 				break;
 			case 4:
-				hormigaActual.setY(hormigaActual.getY() - 1);
+				hormiga.setY(hormiga.getY() - 1);
 				break;
 		}
-		comprobarHormigaDentroTablero(hormigaActual, j);
+		comprobarHormigaDentroTablero();
 	}
 	
 	//Comprueba que la hormiga al moverse sigue dentro del tablero, y si no la mete en el lugar correcto
-	private static void comprobarHormigaDentroTablero(infoHormiga hormigaActual, int j) 
+	private static void comprobarHormigaDentroTablero() 
 	{
-		if (hormigaActual.getX() < 0)
-			hormigaActual.setX(tablero[0] - 1);
-		else if(hormigaActual.getX() >= (tablero[0] - 1))
-			hormigaActual.setX(0);
-		else if(hormigaActual.getY() < 0)
-			hormigaActual.setY(tablero[1] - 1);
-		else if (hormigaActual.getY() >= (tablero[1] - 1))
-			hormigaActual.setY(0);
+		if (hormiga.getX() < 0)
+			hormiga.setX(tablero[0] - 1);
+		else if(hormiga.getX() >= (tablero[0] - 1))
+			hormiga.setX(0);
+		else if(hormiga.getY() < 0)
+			hormiga.setY(tablero[1] - 1);
+		else if (hormiga.getY() >= (tablero[1] - 1))
+			hormiga.setY(0);
 	}
-	
-	
-	
-		/*
-		 * Este es el método principal que se encarga de mover la hormiga e ir cambiando el color de cada posición del tablero
-		 * Si quieres añadir una nueva regla debes escribir en el case lo que se encuentra en el tablero y dentro del case al caracter que se cambia
-		 * Además, escribir el método decir si derecha es true or false
-		 
-		private static void moverHormiga() 
-		{
-			int				maxInteracciones = 20000;
-			int				i;
-			boolean			derecha;
-			
-			i = -1;
-			derecha = true;
-			while(++i < maxInteracciones) 
-			{
-				for (int j = 0; j < posicionHormigas.length;++j) 
-				{
-					switch (tablero[posicionHormigas[j][0]][posicionHormigas[j][1]]) 
-					{
-						case " ":
-							tablero[posicionHormigas[j][0]][posicionHormigas[j][1]] = "#";
-							derecha = true;
-							break;
-						case "#":
-							tablero[posicionHormigas[j][0]][posicionHormigas[j][1]] = "/";
-							derecha = true;
-							break;
-						case "/":
-							tablero[posicionHormigas[j][0]][posicionHormigas[j][1]] = "&";
-							derecha = false;
-							break;
-						case "&":
-							tablero[posicionHormigas[j][0]][posicionHormigas[j][1]] = " ";
-							derecha = false;
-							break;
-					}
-					nuevaPosicionHormigaYOrientacion(derecha, j);
-					comprobarHormigaDentroTablero(j);
-				}
-				pintarTablero();		
-			}
-		}*/
-		
-
 }

@@ -5,7 +5,6 @@ INDEX VERSION 1.131+C:\Users\carlo\eclipse-workspace\.metadata\.metadata\.plugin
 1419937569.index
 2820562198.index
 2317323616.index
-1505849422.index
 3486709943.index
 304761139.index
 3838006238.index

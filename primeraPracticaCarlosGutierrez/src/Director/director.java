@@ -4,7 +4,6 @@ import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileReader;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
@@ -14,69 +13,100 @@ public class director {
 	
 	private static String		[][] 			tablero;
 	private static ArrayList<String>	  		colores;
-	private static File 						tablerotxt;
-	private static int							numeroHormigas, rondasMaximas;
+	private static int							rondasMaximas, numeroReglas;
 	
 	public static void main (String [] args) 
 	{	
 		comunicacionConProcesos(cargarEstadoInicial());		
 	}
-	
+
+	//Es el método principal que comunica el director con los procesos hormiga/s y grabador.
 	private static void comunicacionConProcesos(ArrayList <String> datosEntradaInicial) 
 	{
-		String			salida;
-		ProcessBuilder 	pb;
-		int 			indiceColorActual, i, j;
-		String [] 		respuesta, hormigasTemporal;
+		String										salida;
+		int 										i;
+		String  [] 									todasHormigasTemporal;
+		ArrayList<Process> 							p;
+		ArrayList<ProcessBuilder> 					pb;
 
-		pb = crearProcesoHormiga(datosEntradaInicial);
+		
+		p = new ArrayList<Process>();
+		pb = new ArrayList<ProcessBuilder>();
 		try 
 		{
 			i = 0;
-			Process p = pb.start();
+			crearProcesoHormigaGrabador(datosEntradaInicial, pb, p);
 			salida = "next";
-			hormigasTemporal = new String[numeroHormigas];
+			todasHormigasTemporal = new String[pb.size() - 1];
 			do 
 			{
 				if (++i > rondasMaximas)
 					salida = "end";
-				j = -1;
-				while(++j < numeroHormigas && salida != null) 
-				{
-					mandarMensaje(salida, p);
-					if ((salida = mensajeRecibido(p)) != null)
-					{
-						respuesta = salida.split(" ");
-						indiceColorActual = colores.indexOf(tablero[Integer.parseInt(respuesta[0])] [Integer.parseInt(respuesta[1])]);
-						mandarMensaje(String.valueOf(indiceColorActual), p);
-						salida = mensajeRecibido(p);
-						cambiarColorCasilla(indiceColorActual, respuesta);
-						hormigasTemporal[j] = salida; 
-					}
-				}
-				pintarTablero();
+				for( int j = 0;  j < p.size() - 1 && salida != null; ++j) 
+					salida = comunicacionHormiga(salida, j, todasHormigasTemporal, p);
+				comunicacionGrabador(todasHormigasTemporal, i, p.get(p.size() - 1));
 			}while(salida != null);
-		} catch (IOException e) {
-		}		
+		} catch (IOException e) {}		
 	}
 
-	private static ProcessBuilder crearProcesoHormiga(ArrayList<String> datosEntradaInicial) {
+	//Este método se encarga de las comunicaciones con los procesos  hormiga, (manda si debe moverse o morir, recibe su posición, manda el color y por último cambia de color la casilla y recibe la nueva posición)
+	private static String comunicacionHormiga(String salida, int j, String[] todasHormigasTemporal, ArrayList<Process> p) throws IOException 
+	{
+		int			indiceColorActual;
+		String[]	posicionHormigaTemporal;
+		
+		mandarMensaje(salida, p.get(j));
+		if ((salida = mensajeRecibido(p.get(j))) != null)
+		{
+			posicionHormigaTemporal = salida.split(" ");
+			indiceColorActual = colores.indexOf(tablero[Integer.parseInt(posicionHormigaTemporal[0])] [Integer.parseInt(posicionHormigaTemporal[1])]);
+			mandarMensaje(String.valueOf(indiceColorActual), p.get(j));
+			salida = mensajeRecibido(p.get(j));
+			cambiarColorCasilla(indiceColorActual, posicionHormigaTemporal);
+			todasHormigasTemporal[j] = salida; 
+		}
+		return salida;
+	}
+
+	/* 
+	 * Creo cada proceso y lo inicializo, a cada proceso debo pasarles los 3 primeros parámetros de entrada (java, programa, tablero) y los datos hormigas 
+	 *  Después borro el registro hormiga que ya he usado, inizializo el proceso y paso a inicializar el siguiente.
+	 *	Cuando termino los procesos hormiga, creo e inicializo el proceso grabador (linea 97 - 99)
+	 */
+	private static void crearProcesoHormigaGrabador(ArrayList<String> datosEntradaInicial,ArrayList<ProcessBuilder> pb,ArrayList<Process> p) 
+	{
 		File dir;
-		ProcessBuilder pb;
+		ArrayList <String>	datosEntradaHormiga = new ArrayList<String>();
+		
 		dir = new File(".\\bin");
-		pb = new ProcessBuilder ();
-		pb.directory(dir);
-		pb.command(datosEntradaInicial);
-		return pb;
+		try {
+			for(int i = 0; i < datosEntradaInicial.size(); i++) 
+			{
+				pb.add(new ProcessBuilder ());
+				pb.get(i).directory(dir);
+				for(int j = 0; j < 4; ++j)
+					datosEntradaHormiga.add(datosEntradaInicial.get(j));
+				datosEntradaInicial.remove(3);
+				pb.get(i).command(datosEntradaHormiga);
+				p.add(pb.get(i).start());
+				datosEntradaHormiga.clear();
+			}
+			pb.add(new ProcessBuilder ("java", "Grabador.grabador"));
+			pb.get(pb.size() - 1).directory(dir);
+			p.add(pb.get(pb.size() -1).start());
+		} catch (IOException e) {}
 	}
 
-	private static void cambiarColorCasilla(int indiceColorActual, String[] respuesta) {
-		if ((indiceColorActual + 1) == colores.size())
+	//Con la posición de la hormiga recibida cambio el color de esa casilla al siguiente
+	private static void cambiarColorCasilla(int indiceColorActual, String[] respuesta) 
+	{
+		if ((indiceColorActual + 1) == numeroReglas)
 			tablero[Integer.parseInt(respuesta[0])] [Integer.parseInt(respuesta[1])] = colores.get(0);
 		else
 			tablero[Integer.parseInt(respuesta[0])] [Integer.parseInt(respuesta[1])] = colores.get(indiceColorActual + 1);
 	}
 
+	//Método para leer la respuesta del proceso
 	private static String mensajeRecibido(Process p) throws IOException 
 	{
 		BufferedReader	br;
@@ -84,8 +114,10 @@ public class director {
 		br = new BufferedReader( new InputStreamReader (p.getInputStream()));
 		return br.readLine();
 	}
-
-	private static  void mandarMensaje(String lectura, Process p) throws IOException {
+	
+	// Método para mandar los datos al proceso
+	private static  void mandarMensaje(String lectura, Process p) throws IOException 
+	{
 		BufferedWriter	bw;
 		
 		bw = new BufferedWriter(new OutputStreamWriter ( p.getOutputStream()));
@@ -107,18 +139,14 @@ public class director {
 		datosEntradaInicial.add("java");
 		datosEntradaInicial.add("Hormiga.hormiga");
 		estadoInicial = new File("estadoInicial.txt");
-		tablerotxt = new File("tablero.txt");
-		if (tablerotxt.exists())
-			tablerotxt.delete();
 		
-		try {
-			tablerotxt.createNewFile();	
+		try 
+		{
 			fr = new FileReader(estadoInicial);
 			br = new BufferedReader(fr);
 			i = -1;
 			while(br.readLine() != null)
-					iniciaLizarVariable(br.readLine(), ++i, datosEntradaInicial);
-			numeroHormigas = i - 2;
+					iniciaLizarVariables(br.readLine(), ++i, datosEntradaInicial);
 		} catch (IOException e) {
 			System.out.println(e);	
 		}
@@ -126,8 +154,8 @@ public class director {
 	
 	}
 	
-	// Dependiendo de la liena que esté leyendo del fichero estadoInicial, inicializa una de las variables 
-	private static void iniciaLizarVariable(String lineaLeida, int i, ArrayList<String> datosEntradaInicial) 
+	// Dependiendo de la liena que esté leyendo del fichero estadoInicial, inicializa las variables 
+	private static void iniciaLizarVariables(String lineaLeida, int i, ArrayList<String> datosEntradaInicial) 
 	{
 		String [] argumentos;
 		
@@ -148,9 +176,11 @@ public class director {
 				colores.add(argumentos[j]);
 			}
 		}else  if(i == 2)
-		{
+		
 			rondasMaximas = Integer.parseInt(lineaLeida);
-		}else 
+		else if(i == 3)
+			numeroReglas = Integer.parseInt(lineaLeida);
+		else 
 			datosEntradaInicial.add(lineaLeida);
 	}
 
@@ -162,30 +192,38 @@ public class director {
 				tablero[i][j] = " ";
 	}
 	
-	
-	private static void pintarTablero() 
+	// Guarda los caracteres contenidos en el tablero en un string y después se los manda al proceso grabador.
+	private static void comunicacionGrabador(String[] todasHormigasTemporal, int numeroInteraccion, Process p) 
 	{
-		
-		FileWriter 	fw;
-		
+		String		mensaje;
+		Boolean		encontrada;
+
 		try {
-			fw = new FileWriter(tablerotxt, true);
+			mensaje = numeroInteraccion + "\n";
 			for(int i = 0; i < tablero.length; ++i) 
 			{
 				for (int j = 0; j < tablero[i].length; j++) 
-				{
-		
-						fw.write(tablero[i][j]);
-						fw.write(".");
-
+				{   
+					encontrada = false;
+					for(int k = 0; k < todasHormigasTemporal.length && !encontrada; ++k) 
+					{
+						if(todasHormigasTemporal[k].equals(i + " " + j)) 
+						{
+							mensaje += (char) 165;
+							encontrada = true;
+						}else if(k + 1 == todasHormigasTemporal.length )
+							mensaje += tablero[i][j];
+					}
+					mensaje += ".";
 				}
-					fw.write('\n');
+					mensaje += "\n";
 			}
-			fw.write('\n');
-			fw.close();
-			
-		} catch (IOException e) {
-			e.printStackTrace();
+			mensaje += "\n";
+			if(numeroInteraccion == rondasMaximas)
+				mensaje += "fin";
+			mandarMensaje(mensaje, p);
+		} catch (Exception e) 
+		{
 		}
 	}
 
