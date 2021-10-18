@@ -13,11 +13,13 @@ public class hilo implements Runnable{
 	@Override
 	public void run() 
 	{
+		int n = 0;
 		char fraseChar[]  = dato.getFrase().toCharArray();
 		for(char c: fraseChar) 
 		{
 			if(c == vocal)
-				dato.aumentarNumVar();
+				n++;
 		}
+		dato.aumentarNumVar(n);
 	}
 }

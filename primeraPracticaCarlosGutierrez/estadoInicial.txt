@@ -1,16 +1,16 @@
 Para añadir hormigas, escribe la palabra hormiga y debajo sus 2 coordenadas seguidas de su orientacion ( 1 - 4) y sus reglas ( l izq - r drch) separadas por - 
-85 120
+150 150
 colores (esbrice 32 si quieres espacio como color)
-32 # / K A T I A
+32 # / & C A R L O S
 numero de rondas
-37223
+12000
 numero reglas
-8
+4
 Hormiga1 
-26 28 2 r-l-l-r-r-r-l-l
+26 28 2 r-l-l-r-r-r-l-l-r-r
 Hormiga2
-27 32 1 r-l-r-r-r-r-l-l
+27 32 1 r-l-r-r-r-l-l-r-r
 Hormiga3
-28 26 3 r-r-l-l-r-r-l-l
+28 26 3 r-r-l-l-r-l-l-r-r
 Hormiga4
-31 23 4 r-r-l-l-r-l-r-r
+31 23 4 r-r-l-l-r-l-l-r-r

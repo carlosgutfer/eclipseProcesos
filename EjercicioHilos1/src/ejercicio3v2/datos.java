@@ -1,4 +1,4 @@
-package ejercicio3;
+package ejercicio3v2;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -9,10 +9,15 @@ public class datos
 {
 	private int numeroVocales = 0;
 	private String frase;
+	static char vocaleString [] = {'a', 'e', 'i', 'o', 'u'};
+	private int numeroHilos;
 	
-	public datos(File fichero) 
+	
+	public datos(File fichero, int numeroHilos) 
 	{
 		this.frase = inicializarDato(fichero);
+		this.numeroHilos = numeroHilos;
+		
 	}
 	public  synchronized void aumentarNumVar(int n) 
 	{
@@ -23,10 +28,22 @@ public class datos
 	{
 		return this.numeroVocales;
 	}
-	public String getFrase() 
+	public String getFrase(String i) 
 	{
-		return frase;
+		int cortes = frase.length() / numeroHilos;
+		if (Integer.valueOf(i) != numeroHilos - 1)
+			return frase.substring((Integer.valueOf(i) * cortes), (Integer.valueOf(i) * cortes) + cortes);
+		else 
+			return frase.substring((Integer.valueOf(i) * cortes));
 	}	
+	
+	
+	public static char[] getVocaleString() {
+		return vocaleString;
+	}
+	public void setVocaleString(char[] vocaleString) {
+		this.vocaleString = vocaleString;
+	}
 	
 	private static String inicializarDato(File f1) 
 	{
@@ -45,4 +62,5 @@ public class datos
 	}
 
 	
+
 }

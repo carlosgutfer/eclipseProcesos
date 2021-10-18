@@ -28,7 +28,6 @@ public class director {
 		String  [] 									todasHormigasTemporal;
 		ArrayList<Process> 							p;
 		ArrayList<ProcessBuilder> 					pb;
-
 		
 		p = new ArrayList<Process>();
 		pb = new ArrayList<ProcessBuilder>();
@@ -116,14 +115,16 @@ public class director {
 	}
 	
 	// Método para mandar los datos al proceso
-	private static  void mandarMensaje(String lectura, Process p) throws IOException 
+	private static  void mandarMensaje(String lectura, Process p) 
 	{
 		BufferedWriter	bw;
-		
-		bw = new BufferedWriter(new OutputStreamWriter ( p.getOutputStream()));
-		bw.write(lectura);
-		bw.write("\n");
-		bw.flush();
+		try 
+		{
+			bw = new BufferedWriter(new OutputStreamWriter ( p.getOutputStream()));
+			bw.write(lectura);
+			bw.write("\n");
+			bw.flush();
+		}catch (IOException e) {}
 	}
 
 	// carga el estado inicial del tablero y le da los valores desde el archivo txt
