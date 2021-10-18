@@ -28,7 +28,7 @@ public class hormiga
 				System.out.println(hormiga.getX() + " " + hormiga.getY());
 				entrada = sc.nextLine();
 				nuevaPosicionHormigaYOrientacion(hormiga.getReglas()[Integer.parseInt(entrada)]);
-				System.out.println(hormiga.getY() + " " + hormiga.getX());
+				System.out.println(hormiga.getX() + " " + hormiga.getY());
 			}
 		}while(!entrada.equals("end"));
 		sc.close();
