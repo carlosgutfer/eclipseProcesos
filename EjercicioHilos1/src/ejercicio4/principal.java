@@ -2,7 +2,7 @@ package ejercicio4;
 
 public class principal 
 {
-	public static void main(String[] args) 
+	public  void main(String[] args) 
 	{
 		Thread t[] = new Thread[2];
 		hilo h [] = new hilo [2];

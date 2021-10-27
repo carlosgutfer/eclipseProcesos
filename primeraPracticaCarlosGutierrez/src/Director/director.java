@@ -19,9 +19,54 @@ public class director {
 	{	
 		ArrayList<String> datosLeidos = new ArrayList<String>();
 		
-		datosLeidos = cargarEstadoInicial();
+	
+			datosLeidos = cargarEstadoInicial();
+		if (datosEntradaCorrectos(datosLeidos)) 
+		{
+			comunicacionConProcesos(datosLeidos);
+		}
+	}
+	//Este método comprueba que los datos recibidos del fichero estén dentro de los valores óptimos
+	private static boolean datosEntradaCorrectos(ArrayList<String> datosLeidos) 
+	{
+		boolean valido;
+		String	mensaje;
 		
-		comunicacionConProcesos(datosLeidos);		
+		valido = true;
+		mensaje = "";
+		if(rondasMaximas <= 0) 
+			mensaje = "El número de rondas máximas debe ser mayor que 0";
+		else if (numeroReglas > colores.size()) 
+			mensaje = "El número de reglas no puede ser superior al número de colores";
+		else 
+			mensaje = comprobarInformacionHormiga(datosLeidos, valido, mensaje);
+		if(!mensaje.equals("")) 
+		{
+			System.out.println(mensaje);
+			valido = !valido;
+		}
+		return valido;
+	}
+	
+	//Comprueba que todos los datos que vamos a pasar al proceso hormiga sean correctos
+	private static String comprobarInformacionHormiga(ArrayList<String> datosLeidos, boolean valido, String mensaje)
+	{
+		String[]	datosHormiga;
+		
+		for(int i = 3; i < datosLeidos.size() && valido; ++i) 
+		{
+			datosHormiga = datosLeidos.get(i).split(" ");
+			if(datosHormiga.length != 4)
+				mensaje = "El núermo de parámetros de la hormiga " + (i - 2) + " es " + datosHormiga.length + " y debería ser 4.";
+			else if(datosHormiga[3].split("-").length != numeroReglas) 
+				mensaje = "El número de reglas de la hormiga " + (i - 2) + " es distinto al numero especificado en el fichero.";
+			else if(Integer.valueOf(datosHormiga[2]) > 4 || Integer.valueOf(datosHormiga[2]) < 1) //compurebo orientación
+				mensaje = "La orientación de la hormiga " + (i - 2) + " no está en el rango 1 -4 (ambos incluidos)";
+			else if(tablero.length < Integer.valueOf(datosHormiga[0]) || tablero[0].length < Integer.valueOf(datosHormiga[1])
+						|| 0 > Integer.valueOf(datosHormiga[0]) || 0 > Integer.valueOf(datosHormiga[1])) //compurebo posición
+				mensaje = "La posición inicial de la hormiga  " + (i - 2) + " en el fichero se sale del tablero.";
+		}
+		return mensaje;
 	}
 
 	// carga el estado inicial del tablero y le da los valores desde el archivo txt
@@ -57,29 +102,37 @@ public class director {
 	{
 		String [] argumentos;
 		
-		argumentos = lineaLeida.split(" ");
-		if (i == 0) 
-		{	
-			tablero = new String [Integer.parseInt(argumentos[0])][Integer.parseInt(argumentos[1])];
-			inicializarTablero();
-			datosEntradaInicial.add(lineaLeida);
-		}
-		else if(i == 1) 
+		try //tengo este try por si alguno de los datos introducidos en el fichero no es un número cuando debe serlo
 		{
-			colores = new ArrayList<String>();
-			for(int j = 0; j < argumentos.length; ++j) 
+			argumentos = lineaLeida.split(" ");
+			if (i == 0) 
 			{
-				if (argumentos[j].equals("32"))
-					argumentos[j] = " ";
-				colores.add(argumentos[j]);
+				
+					tablero = new String [Integer.parseInt(argumentos[0])][Integer.parseInt(argumentos[1])];
+					inicializarTablero();
+					datosEntradaInicial.add(lineaLeida);
 			}
-		}else  if(i == 2)
-		
-			rondasMaximas = Integer.parseInt(lineaLeida);
-		else if(i == 3)
-			numeroReglas = Integer.parseInt(lineaLeida);
-		else 
-			datosEntradaInicial.add(lineaLeida);
+			else if(i == 1) 
+			{
+				colores = new ArrayList<String>();
+				for(int j = 0; j < argumentos.length; ++j) 
+				{
+					if (argumentos[j].equals("32"))
+						argumentos[j] = " ";
+					colores.add(argumentos[j]);
+				}
+			}
+			else  if(i == 2)
+				rondasMaximas = Integer.parseInt(lineaLeida);
+			else if(i == 3)
+				numeroReglas = Integer.parseInt(lineaLeida);
+			else 
+				datosEntradaInicial.add(lineaLeida);
+		}
+		catch (Exception e) 
+		{
+			System.out.println("Eror en la linea " + (i + 2));
+		}
 	}
 
 	// Inicializo el tablero con los recuadros en blanco
@@ -97,21 +150,26 @@ public class director {
 	 */
 	private static void crearProcesoHormigaGrabador(ArrayList<String> datosEntradaInicial,ArrayList<ProcessBuilder> pb,ArrayList<Process> p) 
 	{
-		File dir;
+		File 				dir;
 		ArrayList <String>	datosEntradaHormiga = new ArrayList<String>();
-		
+		boolean 			otraHormiga;
+
 		dir = new File(".\\bin");
-		try {
-			for(int i = 0; i < datosEntradaInicial.size(); i++) 
+		otraHormiga = true;
+		try 
+		{
+			for(int i = 0; i < datosEntradaInicial.size() && otraHormiga; i++) // crea tantos proyectos como hormigas hay nHormigas = tamaños - 3 (ya que los 3 primeros registros son comunes a todas)
 			{
 				pb.add(new ProcessBuilder ());
 				pb.get(i).directory(dir);
-				for(int j = 0; j < 4; ++j)
+				for(int j = 0; j < 4; ++j)//añado los 4 primeros registros del array inicial ("java", "nombreProceso", "alotAcnchoTablero", "datosHormiga")
 					datosEntradaHormiga.add(datosEntradaInicial.get(j));
-				datosEntradaInicial.remove(3);
+				datosEntradaInicial.remove(3);//borro los datos de la hormiga que ya he cogido
 				pb.get(i).command(datosEntradaHormiga);
 				p.add(pb.get(i).start());
 				datosEntradaHormiga.clear();
+				if (datosEntradaInicial.size() < 4)
+					otraHormiga = false;
 			}
 			pb.add(new ProcessBuilder ("java", "Grabador.grabador"));
 			pb.get(pb.size() - 1).directory(dir);
@@ -148,17 +206,17 @@ public class director {
 	private static String comunicacionHormiga(String salida, int j, String[] todasHormigasTemporal, ArrayList<Process> p) 
 	{
 		int			indiceColorActual;
-		String[]	posicionHormigaTemporal;
+		String[]	posicionActualHormiga;
 		
-		mandarMensaje(salida, p.get(j));
-		if ((salida = mensajeRecibido(p.get(j))) != null)
+		mandarMensaje(salida, p.get(j));//manda a la hormiga que se mueva
+		if ((salida = mensajeRecibido(p.get(j))) != null)//recibe mensaje donde está
 		{
-			posicionHormigaTemporal = salida.split(" ");
-			indiceColorActual = colores.indexOf(tablero[Integer.parseInt(posicionHormigaTemporal[0])] [Integer.parseInt(posicionHormigaTemporal[1])]);
-			mandarMensaje(String.valueOf(indiceColorActual), p.get(j));
-			salida = mensajeRecibido(p.get(j));
-			cambiarColorCasilla(indiceColorActual, posicionHormigaTemporal);
-			todasHormigasTemporal[j] = salida; 
+			posicionActualHormiga = salida.split(" ");
+			indiceColorActual = colores.indexOf(tablero[Integer.parseInt(posicionActualHormiga[0])] [Integer.parseInt(posicionActualHormiga[1])]);
+			mandarMensaje(String.valueOf(indiceColorActual), p.get(j));//manda color actual
+			salida = mensajeRecibido(p.get(j));//recibe nueva posición
+			cambiarColorCasilla(indiceColorActual, posicionActualHormiga);
+			todasHormigasTemporal[j] = salida; //guada de forma temporal la posición de la hormiga para poder pintarla
 		}
 		return salida;
 	}
