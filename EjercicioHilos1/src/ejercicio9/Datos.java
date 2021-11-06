@@ -92,7 +92,10 @@ public class Datos
 	{
 		ArrayList<Integer> ganadores = new ArrayList<>();
 		ganadores.add(distancia[0]);
-		for(int i = 1; i < distancia.length; ++i)
+		for(int i = 1; i < distancia.length; ++i) 
+		{
+			
+		}
 					
 	}
 
