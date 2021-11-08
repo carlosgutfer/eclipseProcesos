@@ -16,7 +16,7 @@ public class Principal
 
 		tiempoInicio =  System.currentTimeMillis();
 		rangoComprobar = inicializarRangoComprobar();
-		numeroHilos = inicializarNumeroHilos(16, rangoComprobar);
+		numeroHilos = inicializarNumeroHilos(8, rangoComprobar);
 		dato = new Datos(rangoComprobar, numeroHilos);
 		h = inicializarHilos(dato, numeroHilos);
 		inicializarYEjeructarThreads(numeroHilos, h, tiempoInicio, dato);
@@ -43,8 +43,8 @@ public class Principal
 		Scanner 	sc;
 
 		
- 		numeroInicialAnalizar = new BigInteger("100001");
-		numeroFinalAnalizar	= new BigInteger("200001");
+ 		numeroInicialAnalizar = new BigInteger("1");
+		numeroFinalAnalizar	= new BigInteger("100000");
 		while(numeroFinalAnalizar.compareTo(numeroInicialAnalizar) == -1)
 		{
 			sc = new Scanner(System.in);
@@ -65,6 +65,7 @@ public class Principal
 		for(int i = 0; i < t.length; ++i) 
 		{
 			t[i] = new Thread(h[i]);
+			t[i].setName(String.valueOf(i));
 			t[i].start();
 		}
 		try 

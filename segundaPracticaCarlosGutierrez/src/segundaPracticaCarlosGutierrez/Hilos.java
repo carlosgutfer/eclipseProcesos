@@ -22,7 +22,7 @@ public class Hilos implements Runnable
 
 		if(recibirDeUnoEnUno) 
 		{
-			while(!dato.comprobarNumeroDeUnoEnUno());
+			while(!dato.comprobarNumeroDeUnoEnUno(Integer.parseInt(Thread.currentThread().getName())));
 		}
 		else
 		{
