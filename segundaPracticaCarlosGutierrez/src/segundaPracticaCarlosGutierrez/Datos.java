@@ -2,105 +2,98 @@ package segundaPracticaCarlosGutierrez;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class Datos 
 {
-	private HashMap<BigInteger,BigInteger>  tablaNumerosComprobados = new HashMap<>();
-	private HashMap<BigInteger, Integer> 	tablaNumeroContador = new HashMap<>();
-	private BigInteger [] 					maxMinNumerosAnalizar;
-	private ArrayList<BigInteger> 			numerosMaximo;
-	private int								secuenciaMasLarga;
-	private int								numeroTotalHilos;
-	private BigInteger						numeroMaximoEncontrado;
-	private BigInteger						numeroConDistintoBucle;
-
+	private ConcurrentHashMap<BigInteger,BigInteger>  	tablaNumerosComprobados = new ConcurrentHashMap<>();
+	private ConcurrentHashMap<BigInteger, Integer> 		tablaNumeroLongitud = new ConcurrentHashMap<>();
+	private BigInteger [] 								numeroMaximoYMinimoParaAnalizar;
+	private ArrayList<BigInteger> 						numerosConLaSecuenciasMasLargas = new ArrayList<>();;
+	private int											longitudDeLaSecuenciaMasLarga = 0;
+	private int											numeroTotalHilos;
+	private BigInteger									numeroMaximoEncontrado = new BigInteger("0");
+	private BigInteger									numeroConDistintoBucle;
 
 	public Datos(BigInteger[] maxMinNumerosAnalizar, int numeroHilos) 
 	{
 		super();
-		this.maxMinNumerosAnalizar = maxMinNumerosAnalizar;
-		this.numerosMaximo = new ArrayList<>();
-		this.secuenciaMasLarga = 0;
+		this.numeroMaximoYMinimoParaAnalizar = maxMinNumerosAnalizar;
 		this.numeroTotalHilos = numeroHilos;
-		this.numeroMaximoEncontrado = new BigInteger("0");
 	}
-	
-	
+
+	//Este método comrpueba si el número ya ha sido comprobado o no
 	public boolean comprobarNumeroEnTabla(BigInteger num) 
 	{
 		if(tablaNumerosComprobados.containsKey(num)) 
 			return true;
 		else
 			return false;
+	}	
+
+	//Recibe el número que ha comprobado y el contador y lo añade a la tabla, por otro lado si el contador es mayor edita el los números mas largos
+	public  synchronized void comprobarSecuenciaMasLargayAnnadirLongitud(BigInteger numeroComprobar, int contador) 
+	{
+		tablaNumeroLongitud.put(numeroComprobar, contador); 
+		if (contador > longitudDeLaSecuenciaMasLarga) //Si el contador (longitud del número actual hasa el bucle), es mayor que la secuencia más larga limpio el array actual y le doy el nuevo valor a el y a la longitud más larga
+		{
+			numerosConLaSecuenciasMasLargas.clear();
+			numerosConLaSecuenciasMasLargas.add(numeroComprobar);
+			longitudDeLaSecuenciaMasLarga = contador;
+		}
+		else if(contador == longitudDeLaSecuenciaMasLarga) 
+			numerosConLaSecuenciasMasLargas.add(numeroComprobar);
+	}
+
+	//He extraido el metodo que compruebe para evitar que un número pueda pisar a otro al guardarlo creo esta función sincronizada
+	public synchronized void comprobarSiEsElNuevoMaximo(BigInteger num) 
+	{
+		if (numeroMaximoEncontrado.compareTo(num) == -1)//Comprueba si el núevo numero es el más grande analizado nunca
+				numeroMaximoEncontrado = num;
 	}
 	
-	public synchronized void comprobarNumero(BigInteger numeroComprobar) 
+	//Este proceso se encarga de añadir al hasmap numero longitud, la longitud de un número hasta el bucle 4 2 1. 
+	public void añadirLongitud(BigInteger num) 
 	{
-		
-		ArrayList <BigInteger> 	numerosDeLaSecuencia = new ArrayList<>();
-		BigInteger				num;
-		Boolean 				nuevoBucle;
-		int						contador;
+		int 			contador;
+		BigInteger      key;
 
-		contador = 0;
-		nuevoBucle = false;
-		num = numeroComprobar;
-		
-		while(!nuevoBucle) 
-		{	
-			contador ++;
-			if (tablaNumeroContador.containsKey(num))  //Este primer if comprueba si el número ya está comprobado en la tabla contador, si está sale bucle. Con su implementación el programa tarda 1/3 menos de media
-			{
-				contador += tablaNumeroContador.get(num);
-				nuevoBucle = true;
-			}
-			else 
-			{
-				num = nuevoNumeroDeLaSecuencia(num);
-				if (numeroMaximoEncontrado.compareTo(num) == -1)
-						numeroMaximoEncontrado = num;
-				if(numerosDeLaSecuencia.indexOf(num) == -1) //si el número no está en la cadena lo guarda
-					numerosDeLaSecuencia.add(num);
-				else // si está como aun no hemos llegado al 1, sale del bucle y lo guarda (número que rompe la hipótesis) 
-				{
-					nuevoBucle = true;
-					if(num.compareTo(BigInteger.valueOf(4)) != 0)
-						numeroConDistintoBucle = num;			
-				}
-			}
-		}
-		tablaNumeroContador.put(numeroComprobar, contador); 
-		if (contador > secuenciaMasLarga) 
+		contador  = 0;
+		key = num;
+		while(!tablaNumeroLongitud.containsKey(num) && num.compareTo(BigInteger.valueOf(1)) != 0)
 		{
-			numerosMaximo.clear();
-			numerosMaximo.add(numeroComprobar);
-			secuenciaMasLarga = contador;
+			num = ecuacionParaNuevoNuemero(num);
+			contador++;		
 		}
-		else if(contador == secuenciaMasLarga) 
-			numerosMaximo.add(numeroComprobar);
+		try 
+		{
+			contador += tablaNumeroLongitud.get(num);
+		}catch (Exception e) {}
+		tablaNumeroLongitud.put(key, contador);		
 	}
 
 	//Este método devuelve el siguiente número de la secuencia, el cual puede ser el value de una key de los números comprobados, o un número número
-	private BigInteger nuevoNumeroDeLaSecuencia(BigInteger num) 
+	public BigInteger nuevoNumeroDeLaSecuencia(BigInteger num) 
 	{
-		
-		BigInteger[] 	auxiliarBigIntegers;
-		BigInteger 		keyMap;
-		
 		if (comprobarNumeroEnTabla(num)) //este if comprubea si el número ya se ha comprobado en la tabla de secuencias, si está devuelve el valor que tiene
 			num = tablaNumerosComprobados.get(num);
 		else 
-		{
-			keyMap = num; //guardo el número que voy a añadir como key en el keymap
-			auxiliarBigIntegers = num.divideAndRemainder(BigInteger.valueOf(2)); //calcula el resto de dividir el numero entre 2
-			if (auxiliarBigIntegers[1] != BigInteger.valueOf(0)) // si es impar num = num * 3 + 1
-				num = num.multiply(BigInteger.valueOf(3)).add(BigInteger.valueOf(1));
-			else 
-				num = num.divide(BigInteger.valueOf(2)); //si es par num = num / 2 
-			tablaNumerosComprobados.put(keyMap, num);
-		}
+			num = ecuacionParaNuevoNuemero(num);
 		return num;
+	}
+	
+	//Este metodo realiza la ecuación dependiendo de si es par o impar y devuelve el resulado
+	private BigInteger ecuacionParaNuevoNuemero(BigInteger num) 
+	{
+		BigInteger[] auxiliarBigIntegers;
+		BigInteger   resultado;
+		auxiliarBigIntegers = num.divideAndRemainder(BigInteger.valueOf(2)); //calcula el resto de dividir el numero entre 2
+		if (auxiliarBigIntegers[1] != BigInteger.valueOf(0)) // si es impar num = num * 3 + 1
+			resultado = num.multiply(BigInteger.valueOf(3)).add(BigInteger.valueOf(1));
+		else 
+			resultado = num.divide(BigInteger.valueOf(2)); //si es par num = num / 2 
+		tablaNumerosComprobados.put(num, resultado);
+		return resultado;
 	}
 	
 	//Este método devuelve el rango de números que debe analizar cada hilo en el caso de que no haya que mandárselos de 1 en 1
@@ -109,78 +102,74 @@ public class Datos
 		BigInteger [] 	numerosAnalizar = new BigInteger [2];
 		BigInteger 		rangoNumeros;
 		
-		rangoNumeros = maxMinNumerosAnalizar[1].subtract(maxMinNumerosAnalizar[0]);
+		rangoNumeros = numeroMaximoYMinimoParaAnalizar[1].subtract(numeroMaximoYMinimoParaAnalizar[0]);
 		if (hiloActual != 0) //Formula primer numero min analizar para cualquier hilo menos el 1º. Min =valorInicial + ((rangoNumero / hilos) * numHilo) + 1
-			numerosAnalizar[0] = maxMinNumerosAnalizar[0].add((rangoNumeros.divide(BigInteger.valueOf(numeroTotalHilos))).multiply(BigInteger.valueOf(hiloActual)).add(BigInteger.valueOf(1)));
+			numerosAnalizar[0] = numeroMaximoYMinimoParaAnalizar[0].add((rangoNumeros.divide(BigInteger.valueOf(numeroTotalHilos))).multiply(BigInteger.valueOf(hiloActual)).add(BigInteger.valueOf(1)));
 		else 
-			numerosAnalizar[0] = maxMinNumerosAnalizar[0];
+			numerosAnalizar[0] = numeroMaximoYMinimoParaAnalizar[0];
 		if (hiloActual != numeroTotalHilos - 1) //Formula calcular máximo analizar para cualquier hilo menos el último. Max = valorInicial + ((rangoNumero / numHilos) * (HiloActual + 1))
-			numerosAnalizar[1] = maxMinNumerosAnalizar[0].add((rangoNumeros.divide(BigInteger.valueOf(numeroTotalHilos))).multiply(BigInteger.valueOf(hiloActual + 1)));
+			numerosAnalizar[1] = numeroMaximoYMinimoParaAnalizar[0].add((rangoNumeros.divide(BigInteger.valueOf(numeroTotalHilos))).multiply(BigInteger.valueOf(hiloActual + 1)));
 		else
-			numerosAnalizar[1] = maxMinNumerosAnalizar[1];
+			numerosAnalizar[1] = numeroMaximoYMinimoParaAnalizar[1];
 		return numerosAnalizar;
 	}
 	
 	//Este es el método para imprimir los resultados por pantalla
-	public void mostrarNumerosMasAltos(Double tiempoFin) 
+	public void mostrarNumerosMasAltos(Double tiempoFin, boolean comprobarYaExplorados) 
 	{
-		int contador;
-		
-		contador = 0;
-	    System.out.println("Timepo de proceso: " + tiempoFin + " segundos");
+	    System.out.println("Tiempo de proceso: " + tiempoFin + " segundos");
 	    System.out.println("Secuencias más largas: ");
-		for(int i = 0; i < numerosMaximo.size(); ++i) //Imprimo los números de las secuencias más lar
-		{
-			contador = 1;
-			System.out.print(numerosMaximo.get(i) + ",");
-			while (numerosMaximo.get(i).compareTo(BigInteger.valueOf(1)) != 0) 
-			{
-				System.out.print(tablaNumerosComprobados.get(numerosMaximo.get(i)) + ", ");
-				numerosMaximo.set(i, tablaNumerosComprobados.get(numerosMaximo.get(i)));
-				contador++;
-			}
-			
-		}
-		
-		System.out.println("\nSu longitud es: " + contador);
+	    numerosConLaSecuenciasMasLargas.forEach(num ->
+	    {
+	    		while(num.compareTo(BigInteger.valueOf(1)) != 0) 
+	    		{
+	    			System.out.print(num + " ");
+	    			num = tablaNumerosComprobados.get(num);
+	    		}
+	    		System.out.print(num);
+	    });
+	    if (!comprobarYaExplorados)
+	    	longitudDeLaSecuenciaMasLarga += 1;
+	    System.out.println("\nSu longitud es: " + longitudDeLaSecuenciaMasLarga);
 		System.out.println("El número más alto alcanzado es: " + numeroMaximoEncontrado);
 		System.out.print("Números que no terminan en el número 1: " );
 		if (numeroConDistintoBucle == null)
 			System.out.println("<ninguno>");
 		else 
-			System.out.println(numeroConDistintoBucle);
-		
+			System.out.println(numeroConDistintoBucle);	
 	}
-	
-	public synchronized  boolean comprobarNumeroDeUnoEnUno(int hiloActual)
+
+	//Este método devuelve el número que te le toca analizar al hilo 
+	public synchronized BigInteger getNumeroAnalizar()
 	{
-		Boolean finDelJuego;
+		BigInteger numeroAnalizar;
 		
-		finDelJuego = false;
-		try 
-		{
-			if(maxMinNumerosAnalizar[1].compareTo(maxMinNumerosAnalizar[0]) == 0)
-			{				
-				notifyAll();
-				finDelJuego = true;
-			}
-			else 
-			{ 
-				if(hiloActual >= numeroTotalHilos - 1 && numeroTotalHilos !=1 )
-				{
-					notifyAll();
-				}
-				else 
-				{
-					comprobarNumero(maxMinNumerosAnalizar[0]);
-					maxMinNumerosAnalizar[0] = maxMinNumerosAnalizar[0].add(BigInteger.valueOf(1));
-					if (numeroTotalHilos !=1)
-						wait();
-				}
-				
-			}
-		} catch (Exception e){}
-		return finDelJuego;
+		numeroAnalizar = numeroMaximoYMinimoParaAnalizar[0];
+		numeroMaximoYMinimoParaAnalizar[0] = numeroMaximoYMinimoParaAnalizar[0].add(BigInteger.valueOf(1));
+		return numeroAnalizar;
 	}
-				
+
+	//En este método entra el hilo para saber si ya se han terminado de analizar todos los números del rango en el caso de 1 en 1			
+	public  boolean todosAnalizados() 
+	{
+		if(numeroMaximoYMinimoParaAnalizar[1].compareTo(numeroMaximoYMinimoParaAnalizar[0]) == -1)
+			return true;
+		else 
+			return false;
+	}
+
+	// Devuelvo la longitud que hay desde ese número hasta su bucle si se ha calculado ya, si no se ha calculado devuelve -1
+	public int comprobarSiSeLongitud(BigInteger n) 
+	{
+		if (tablaNumeroLongitud.get(n) != null)  //Este primer if comprueba si el número ya está comprobado en la tabla contador, si está sale bucle. Con su implementación el programa tarda 1/3 menos de media
+			return tablaNumeroLongitud.get(n);
+		else 
+			return -1;
+	}
+
+	// Cambio el valor del númeroConDistintoBucle
+	public void setNumeroConDistintoBucle(BigInteger num) 
+	{
+		numeroConDistintoBucle = num;
+	}
 }
