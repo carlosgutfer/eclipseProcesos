@@ -46,7 +46,6 @@ public class Principal
 		BigInteger	numeroFinalAnalizar;
 		BigInteger	numeroInicialAnalizar;
 		
-
 		do
 		{	
 			System.out.println("Introduzca el número más pequeño a analizar (mayor que 2)");
@@ -78,14 +77,14 @@ public class Principal
 				t[i].join();
 		} catch (Exception e) {}
 		tiempoFin = (double) (System.currentTimeMillis() - tiempoInicio) / 1000;
-		dato.mostrarNumerosMasAltos(tiempoFin, h[0].getComprobarYaExploradas());
+		dato.mostrarNumerosMasAltos(tiempoFin);
 	}
 
 	//Este método pregunta si se desea que los hilos reciban los números de 1 en 1 o si por el contrario prefiere todos al principio y después inicializa los hilos
 	private static Hilos[] inicializarHilos(Datos dato, int numeroHilos) 
 	{
 		Hilos[]	h;
-		Boolean recibirDeUnoEnUno, revisarSecuenciasExploradas;
+		Boolean recibirDeUnoEnUno = false, revisarSecuenciasExploradas = false;
 		
 		System.out.println("Escriba:\n1 si desea que los hilos pidan los números de 1 o en 1\n2 si desea que el hilo pida el rango a analizar");
 		if(sc.nextInt() == 1)
@@ -99,11 +98,10 @@ public class Principal
 			revisarSecuenciasExploradas = false;
 		h = new Hilos[numeroHilos];
 		for(int i = 0; i < numeroHilos; ++i)
-			h[i] = new Hilos(dato, i, recibirDeUnoEnUno, revisarSecuenciasExploradas);
+			h[i] = new Hilos(dato, recibirDeUnoEnUno, revisarSecuenciasExploradas);
 		sc.close();
 		return h;
 	}
-	
 	
 
 }

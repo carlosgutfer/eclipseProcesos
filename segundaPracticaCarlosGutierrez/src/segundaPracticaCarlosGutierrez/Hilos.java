@@ -6,27 +6,26 @@ import java.util.ArrayList;
 public class Hilos implements Runnable 
 {
 	private Datos dato;
-	private int numeroHilo;
 	private boolean recibirDeUnoEnUno;
 	private boolean revisarSecuenciasExploradas;
+	private BigInteger numeroMasAltoAlcanzado;
 
-	public Hilos(Datos dato, int numeroHilo, boolean recibirDeUnoEnUno, boolean revisarSecuenciasExploradas) 
+	public Hilos(Datos dato, boolean recibirDeUnoEnUno, boolean revisarSecuenciasExploradas) 
 	{
 		super();
 		this.dato = dato;
-		this.numeroHilo = numeroHilo;
 		this.recibirDeUnoEnUno = recibirDeUnoEnUno;
 		this.revisarSecuenciasExploradas = revisarSecuenciasExploradas;
+		this.numeroMasAltoAlcanzado = new BigInteger("0");
 	}
 
 	public void run() 
 	{
-		BigInteger [] numerosAnalizar;
-		BigInteger    numeroRecibido;
+		ArrayList<BigInteger>  	numerosAnalizar;
+		BigInteger    			numeroRecibido; 				
 
 		if(recibirDeUnoEnUno)//si recibe de 1 en 1 llama al método datos que va actualizando el num mínimo a analizar hasta que este sea mayor que el máximo donde no lo analiza y para 
 		{
-			
 			do 
 			{
 				numeroRecibido = dato.getNumeroAnalizar();
@@ -35,13 +34,11 @@ public class Hilos implements Runnable
 		}
 		else
 		{
-			numerosAnalizar = dato.numerosParaAnalizar(numeroHilo); //recibe el rango de numeros a analizar ej. [1 - 10]
-			while(numerosAnalizar[0].compareTo(numerosAnalizar[1]) < 1)//va mandando números a datos para que calcule  y aumenta el mínimo hasta que sea mayor que el máximo a analizar el cual no manda y se detiene el hilo
-			{
-				comprobarNumero(numerosAnalizar[0]);
-				numerosAnalizar[0] = numerosAnalizar[0].add(BigInteger.valueOf(1));
-			}
+			numerosAnalizar = dato.numerosParaAnalizar(Integer.valueOf(Thread.currentThread().getName())); //recibe el rango de numeros a analizar ej. [1 - 10]
+			for(BigInteger i = numerosAnalizar.get(0); i.compareTo(numerosAnalizar.get(numerosAnalizar.size() - 1)) != 0; i = i.add(BigInteger.valueOf(1)))
+				comprobarNumero(i);
 		}
+		dato.comprobarSiEsElNuevoMaximo(numeroMasAltoAlcanzado);
 	}
 	
 	//Este método recibe un número y comprueba si cumple la secuencia 4 2 1, si no guarda el número en una variable.
@@ -66,9 +63,9 @@ public class Hilos implements Runnable
 			}
 			else 
 			{   
-				dato.añadirLongitud(num);//Como no está en los números que ya se su longitud llamo al método que lo añade
 				num = dato.nuevoNumeroDeLaSecuencia(num);
-				dato.comprobarSiEsElNuevoMaximo(num);
+				if(num.compareTo(numeroMasAltoAlcanzado) ==1)
+					numeroMasAltoAlcanzado = num;
 				if(numerosDeLaSecuencia.indexOf(num) == -1) //si el número no está en la cadena lo guarda del número actual lo guarda
 				{
 					numerosDeLaSecuencia.add(num);
@@ -82,13 +79,9 @@ public class Hilos implements Runnable
 				contador ++;
 			}
 		}
-		dato.comprobarSecuenciaMasLargayAnnadirLongitud(numeroComprobar, contador);
+		dato.comprobarSecuenciaMasLargaYAnnadirLongitud(numeroComprobar, contador);
 	}
 
-	public  boolean getComprobarYaExploradas() 
-	{
-		return revisarSecuenciasExploradas;
-	}
 }
 
 
