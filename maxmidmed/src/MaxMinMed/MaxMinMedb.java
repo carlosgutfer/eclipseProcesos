@@ -92,7 +92,7 @@ public class MaxMinMedb {
 			bw.flush();
 			br = new BufferedReader(new InputStreamReader(p.getInputStream()));
 			salida = br.readLine();
-			archivoLectura = new File(".\\bin\\"+salida);
+			archivoLectura = new File(".\\bin\\" + salida);
 			FileReader fr = new FileReader(archivoLectura);
 			br = new BufferedReader(fr);
 			while((line = br.readLine()) != null)
