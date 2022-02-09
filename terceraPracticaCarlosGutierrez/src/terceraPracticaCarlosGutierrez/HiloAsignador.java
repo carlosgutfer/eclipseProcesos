@@ -23,15 +23,18 @@ public class HiloAsignador implements Runnable
 	public void run() 
 	{
 		inicializarClientes();
-		while(!datosAsignadorConClientes.fin()) 
+		while(!datosAsignadorConClientes.fin())//Este bucle se ejecuta hasta que queden hilos hijos 
 		{
 			tarea = datos.consumidor();
 			datosAsignadorConClientes.productor(tarea);
 		}
-		datos.setFin();
+		datos.setFin();//llamo al método de la clase datos que será necesario para que se apage el hilo Creador
 		System.out.println("Cierro mi comunicación con el hilo");
 	}
 
+	
+	//Por cada sockets defindio creo un hilo que se comunicará con el cliente , además llamo al constructor de la clase
+	//datosAsigandorConClientes que sea una clase auxiliar entre este hilo asignador y sus hilos "hijos" con un método productor y otro consumidor
 	private void inicializarClientes() 
 	{
 		datosAsignadorConClientes = new DatosAsignadorConClientes(sockets.size());

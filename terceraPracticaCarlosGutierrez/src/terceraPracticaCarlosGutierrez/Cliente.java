@@ -29,10 +29,10 @@ public class Cliente {
 			bw = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
 			input =  new ObjectInputStream(socket.getInputStream());
 			enviarMensaje("new");
-			do
+			do // Este bucle se ejecuta hasta que el hiloCliente manda una tarea con el identificador 0
 			{
 				tarea =  recibirMensaje();
-				if(contadorDeHoras - tarea.getHoras() > -1) 
+				if(contadorDeHoras - tarea.getHoras() > -1) // Si las horas disponibles, menso las recibidas es mayor que 0 se ejecuta esto
 				{
 					contadorDeHoras -= tarea.getHoras();
 					if(contadorDeHoras != 0) 
@@ -41,12 +41,13 @@ public class Cliente {
 						enviarMensaje("fin");
 				}
 				else
-					enviarMensaje("Tiempo escedido");
+					enviarMensaje("Tiempo excedido");
 			}while(tarea.getIdentificador() != 0);
 			System.out.println("salí");
 		} catch (Exception e) {System.out.println(e); }	
 	}
 
+	//Método para recibir mensajes del hiloCliente
 	private static Tarea recibirMensaje() 
 	{
 		Tarea tarea;
@@ -61,7 +62,8 @@ public class Cliente {
 		}		
 		return tarea;
 	}
-
+	
+	//Método para enviar menajses al HiloCliente
 	private static void enviarMensaje(String mensaje) 
 	{		
 		try 
@@ -75,6 +77,7 @@ public class Cliente {
 		}		
 	}
 	
+	//Método para tomar la dirección del servidor
 	private static InetAddress getServidor() 
 	{
 		InetAddress dir = null;
@@ -89,7 +92,7 @@ public class Cliente {
 		}		
 		return dir;
 	}
-
+		// Método para crear el socket con el servidor
 	private static Socket getSocket() 
 	{	
 		Socket s = null;

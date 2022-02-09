@@ -43,24 +43,18 @@ public class Tarea implements Serializable, Comparable
 	}
 
 
-	/*@Override
+	@Override
 	public int compareTo(Object o) 
 	{
 		int compNumCLiente=((Tarea)o).getNumeroCliente();
         return this.numeroCliente - compNumCLiente;		
-	}*/
-	
-	@Override
-	public int compareTo(Object o) 
-	{
-		int compNumCLiente=((Tarea)o).getIdentificador();
-        return this.identificador - compNumCLiente;		
 	}
+	
 
 	@Override
 	public String toString() 
 	{
-		return "Numero de empleado: " + numeroCliente+ "\t Horas de la tarea: " + horas + "\t Identificador de tarea: " + identificador + "\n";
+		return "Numero de empleado: " + numeroCliente +  "\t Numero de tarea: " + identificador + "\t Horas de la tarea: " + horas  + "\n";
 	}
 
 

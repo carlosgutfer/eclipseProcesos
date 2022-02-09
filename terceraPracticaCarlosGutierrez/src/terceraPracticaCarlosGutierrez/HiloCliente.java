@@ -31,20 +31,18 @@ public class HiloCliente implements Runnable {
 				br = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 				output = new ObjectOutputStream(socket.getOutputStream());
 			} catch (IOException e) {e.printStackTrace();}
-			do 
+			do //Este bucle que se ejecuta hasta que el cliente mánda el mensaje 'fin'
 			{
 				recibirMensje = recibirMensjeCliente();
-				if(recibirMensje.equals("fin")) 
+				if(recibirMensje.equals("fin")) //Si es el mensaje fin, manda la tarea 0,0 para que el cliente también se detenga
 					enviarMensajeCliente(new Tarea(0, 0));
 				else 
 				{
-					if(recibirMensje.equals("new") && tarea != null) 
-					{
+					if(recibirMensje.equals("new") && tarea != null) // si la tarea no es null, y el mensaje recibido es 'new' porque la tarea ha sido aceptada llama al método que inserta la tarea para después crear el informe
 						datos.setTareaAceptada(tarea, Thread.currentThread().getName());
-					}
 					else 
 					{
-						if(!datos.setTiempoEscedido(Thread.currentThread().getName()))
+						if(!datos.setTiempoExcedido(Thread.currentThread().getName()))// si la tarea ha sido rechazada, comprueba si este hilo ya la ha rechazado o no, para reenviar la tarea a otro hilo o descartarla definitivamente si ya están todos comprobados
 							datos.productor(tarea);
 						System.out.println(recibirMensje);
 					}
@@ -61,6 +59,7 @@ public class HiloCliente implements Runnable {
 		System.out.println("Cierro mi comunicación con el cliente");
 	}
 	
+	//Método que lee los mensajes que me da el cliente
 	private String recibirMensjeCliente() 
 	{
 		String mensaje = "";
@@ -71,7 +70,7 @@ public class HiloCliente implements Runnable {
 		}
 		return mensaje;
 	}
-
+	// Método para comunicarse con el cliente
 	private void enviarMensajeCliente(Tarea tarea) 
 	{
 		try 

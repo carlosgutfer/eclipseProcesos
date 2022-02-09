@@ -1,0 +1,8 @@
+Para que el programa funcione correctamentese deben arrancar los procesos en siguiente orden:
+-Servidor(1)
+-ServidorTarea(1)
+-Trabajador(n)
+Al final de cada ejecucion se creara el fichero "resultados.txt" que contendra las ejecuciones.
+Se debera borrar despues de cada ejecucion para leer unicamente los ultimos resultados.
+
+PD: Se que la clase GestorDeTareas es un poco caos cun tanto notify y bool pero no encontre otra forma.

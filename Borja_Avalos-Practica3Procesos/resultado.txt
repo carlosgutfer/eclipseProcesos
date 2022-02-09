@@ -1,0 +1,25 @@
+
+Tareas del trabajador: Trabajador 1
+
+Tarea numero: 1 duracion: 2
+Tarea numero: 2 duracion: 2
+Tarea numero: 3 duracion: 3
+Tarea numero: 4 duracion: 2
+Tarea numero: 5 duracion: 2
+Tarea numero: 6 duracion: 2
+Tarea numero: 7 duracion: 1
+Tarea numero: 8 duracion: 2
+Tarea numero: 9 duracion: 2
+Tarea numero: 10 duracion: 1
+Tarea numero: 11 duracion: 2
+Tarea numero: 12 duracion: 2
+Tarea numero: 13 duracion: 2
+Tarea numero: 14 duracion: 2
+Tarea numero: 15 duracion: 2
+Tarea numero: 16 duracion: 1
+Tarea numero: 17 duracion: 2
+Tarea numero: 18 duracion: 2
+Tarea numero: 19 duracion: 1
+Tarea numero: 20 duracion: 3
+Tarea numero: 22 duracion: 1
+Tarea numero: 24 duracion: 1

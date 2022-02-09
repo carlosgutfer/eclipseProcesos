@@ -23,12 +23,12 @@ public class HiloCreador implements Runnable {
 	{
 		String horasTarea [];
 		comunicacionCreadorTareas();
-	do 
+	do //El bucle se ejecuta hasta que la variable fin de la clase datos sea falsa
 	{
-		enviarMensajeCreadorTareas("new".getBytes());
+		enviarMensajeCreadorTareas("new".getBytes()); 
 		packetCreadorTareas = recibirMensajeCreadorTareas();
-		horasTarea = (new String (packetCreadorTareas.getData())).split("-");
-		datos.productor(new Tarea(Integer.valueOf(horasTarea[0].trim()), Integer.valueOf(horasTarea[1].trim())));
+		horasTarea = (new String (packetCreadorTareas.getData())).split("-");// Parto el string recibido  en un array con split
+		datos.productor(new Tarea(Integer.valueOf(horasTarea[0].trim()), Integer.valueOf(horasTarea[1].trim())));// Creo el objeto con la tarea recibida
 	}while(!datos.getFin());
 		enviarMensajeCreadorTareas("stop".getBytes());
 		System.out.println("Apago el creador de tareas");
@@ -42,6 +42,7 @@ public class HiloCreador implements Runnable {
 		dirCreadorTareas = getCreadorTareas();
 	}
 	
+	//Método para inicializar el inetAdress
 	private InetAddress getCreadorTareas() 
 	{
 		InetAddress inetAddress = null;	
@@ -54,6 +55,7 @@ public class HiloCreador implements Runnable {
 		return inetAddress;
 	}
 	
+	//Método qeu recibe el mensaje del creador de tareas
 	private DatagramPacket recibirMensajeCreadorTareas() 
 	{
 		DatagramPacket packet = new DatagramPacket(new byte[20], 20);	
@@ -66,7 +68,8 @@ public class HiloCreador implements Runnable {
 		}
 		return packet;
 	}
-
+	
+	//Método para enviar el mensaje al creador de tareas
 	private void enviarMensajeCreadorTareas(byte[] bytes) 
 	{
 		DatagramPacket packet = new DatagramPacket(bytes, bytes.length, dirCreadorTareas, puertoCreadorTareas);	
@@ -79,14 +82,13 @@ public class HiloCreador implements Runnable {
 		
 	}
 
-
+//Método para inicializar el socket
 	private DatagramSocket getSocket() 
 	{
 		DatagramSocket socket = null;
 		try {
 			socket = new DatagramSocket();
 		} catch (SocketException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		return socket;

@@ -47,12 +47,12 @@ public class DatosHilocreadorConCreador
 		return aux;
 	}
 
-
 	public  boolean getFin() 
 	{
 		return fin;
 	}
 
+	//Al finalizar el hilo Asignador, se hace una llamada a este método para que se detenga el hiloCreador 
 	public synchronized void setFin() 
 	{
 		fin = true;
